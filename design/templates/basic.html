@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Design.Pro{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<header class="site-header">
+    <div class="header-container">
+        <a class="logo-link" href="{% url 'index' %}">
+            <h1 class="site-title">Design.Pro</h1>
+        </a>
+        <nav class="main-nav">
+            {% if user.is_authenticated %}
+                {% if user.is_staff %}
+                    <a class="nav-item" href="{% url 'simple_admin_panel' %}">Админ-панель</a>
+                    <a class="nav-item" href="/admin/">Django Admin</a>
+                {% endif %}
+                <a class="nav-item" href="{% url 'profile' %}">
+                    Профиль
+                </a>
+                <a class="nav-item" href="{% url 'logout' %}">
+                    Выйти
+                </a>
+            {% else %}
+                <a class="nav-item" href="{% url 'register' %}">
+                    Регистрация
+                </a>
+                <a class="nav-item" href="{% url 'login' %}">
+                    Авторизация
+                </a>
+            {% endif %}
+        </nav>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="content-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert-message {{ message.tags }}">
+                    {{ message }}
+                    <button class="alert-close" onclick="this.parentElement.style.display='none'">×</button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %} {% endblock %}
+    </div>
+</main>
+</body>
+</html>

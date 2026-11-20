@@ -1,0 +1,129 @@
+{% extends 'basic.html' %}
+
+{% block title %}Личный профиль{% endblock %}
+
+{% block content %}
+<h2 class="welcome-title">Добро пожаловать, {{ user.first_name }}!</h2>
+
+<div class="profile-card">
+    <div class="card-header">
+        <h3 class="card-title">Мои данные</h3>
+    </div>
+
+    <div class="card-body">
+        <div class="profile-info">
+            <div class="info-row">
+                <span class="info-label">Имя:</span>
+                <span class="info-value">{{ user.first_name }}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Фамилия:</span>
+                <span class="info-value">{{ user.last_name }}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Email:</span>
+                <span class="info-value">{{ user.email }}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Имя пользователя:</span>
+                <span class="info-value">{{ user.username }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section-header">
+    <h3>Мои заявки</h3>
+    {% if not is_staff %}
+        <a href="{% url 'application-create' %}" class="create-button">
+            Создать новую заявку
+        </a>
+    {% endif %}
+</div>
+
+<div class="filter-box">
+    <form method="get" class="filter-form">
+        <label for="status" class="filter-label">Фильтр по статусу:</label>
+        <select name="status" id="status" class="filter-select" onchange="this.form.submit()">
+            <option value="">Все заявки</option>
+            {% for status_code, status_name in status_choices %}
+                <option value="{{ status_code }}"
+                    {% if status_code == status_filter %}selected{% endif %}>
+                    {{ status_name }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+
+{% if is_staff %}
+    <div class="info-message">
+        Администраторы не могут создавать заявки. Используйте админ-панель для управления заявками.
+    </div>
+{% endif %}
+
+{% if applications %}
+    <div class="applications-grid">
+        {% for application in applications %}
+        <div class="application-card">
+            <div class="application-header">
+                <h4 class="application-title">{{ application.title|truncatechars:30 }}</h4>
+                <span class="status-badge {{ application.status }}">
+                    {{ application.get_status_display }}
+                </span>
+            </div>
+
+            {% if application.image %}
+                <img src="{{ application.image.url }}"
+                     class="application-image"
+                     alt="{{ application.title }}">
+            {% endif %}
+
+            <div class="application-body">
+                <div class="application-meta">
+                    <span class="meta-label">Категория:</span>
+                    <span class="meta-value">{{ application.category.name }}</span>
+                </div>
+
+                <div class="application-meta">
+                    <span class="meta-label">Дата создания:</span>
+                    <span class="meta-value">{{ application.date|date:"d.m.Y H:i" }}</span>
+                </div>
+
+                <p class="application-description">{{ application.description|truncatechars:100 }}</p>
+            </div>
+
+            <div class="application-footer">
+                <a href="{% url 'application-detail' application.id %}"
+                   class="action-button view-button">
+                    Подробнее
+                </a>
+
+                {% if application.status == 'N' and not is_staff %}
+                    <form method="post"
+                          action="{% url 'application-delete' application.id %}"
+                          onsubmit="return confirm('Вы уверены, что хотите удалить заявку?');">
+                        {% csrf_token %}
+                        <button type="submit" class="action-button delete-button">
+                            Удалить
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <p class="empty-text">У вас пока нет заявок.</p>
+        {% if not is_staff %}
+            <a href="{% url 'application-create' %}" class="empty-button">
+                Создать первую заявку
+            </a>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

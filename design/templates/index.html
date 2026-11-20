@@ -1,0 +1,86 @@
+{% extends 'basic.html' %}
+
+{% block title %}Главная - Design.Pro{% endblock %}
+
+{% block content %}
+<div class="page-center">
+    <h1 class="page-title">Design.Pro - Платформа дизайнерских проектов</h1>
+    <div class="stats-box">
+        <h3 class="stats-title">Статистика</h3>
+        <p class="stats-text">
+            Заявок в работе: <span class="stats-number">{{ in_progress|default:"0" }}</span>
+        </p>
+    </div>
+    {% if completed_applications %}
+        <h3 class="section-title">Последние выполненные проекты</h3>
+
+        <div class="projects-grid">
+            {% for application in completed_applications %}
+            <div class="project-card">
+                {% if application.image %}
+                    <img src="{{ application.image.url }}"
+                         class="project-image"
+                         alt="{{ application.title }}">
+                {% endif %}
+
+                <div class="project-content">
+                    <div class="project-title">{{ application.title|truncatechars:25 }}</div>
+
+                    <div class="project-category">
+                        {{ application.category.name }}
+                    </div>
+
+                    <div class="project-date">
+                        {{ application.date|date:"d.m.Y H:i" }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+        {% if user.is_staff %}
+            <div class="info-box admin-box">
+                <h3 class="info-title">Вы вошли как администратор</h3>
+                <p class="info-text">Для управления заявками и категориями используйте админ-панель</p>
+            </div>
+        {% else %}
+            <div class="info-box user-box">
+                <h3 class="info-title">Добро пожаловать, {{ user.first_name }}!</h3>
+                <p class="info-text">У вас есть идея для дизайнерского проекта? Создайте заявку!</p>
+                <a href="{% url 'application-create' %}" class="action-button create-button">
+                    Создать новую заявку
+                </a>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="roles-container">
+            <div class="role-card">
+                <h3 class="role-title">Заказчикам</h3>
+                <p class="role-text">
+                    Размещайте заявки на дизайнерские услуги и находите лучших исполнителей
+                </p>
+                <a href="{% url 'register' %}" class="role-button client-button">
+                    Начать работу
+                </a>
+            </div>
+
+            <div class="role-card">
+                <h3 class="role-title">Дизайнерам</h3>
+                <p class="role-text">
+                    Находите интересные проекты, развивайте портфолио и зарабатывайте
+                </p>
+                <a href="{% url 'register' %}" class="role-button designer-button">
+                    Присоединиться
+                </a>
+            </div>
+        </div>
+
+        <div class="login-prompt">
+            <p class="prompt-text">Уже есть аккаунт?</p>
+            <a href="{% url 'login' %}" class="prompt-button">Войти в систему</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
